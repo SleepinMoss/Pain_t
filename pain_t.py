@@ -4,10 +4,21 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from pathlib import Path
 from PIL import ImageGrab, Image, ImageTk
+import sys
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(sys._MEIPASS)
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+assetsDir = BASE_DIR
 
 root = tk.Tk()
 root.title("Pain_t")
 root.geometry("1080x720")
+
+root.iconphoto(
+    True,
+    tk.PhotoImage(file=assetsDir / "icon.png")
+)
 
 theme = {
     "bgCol":"#232323",
@@ -307,12 +318,6 @@ root.bind(shortcut["colPick"], colPick)
 root.bind(shortcut["undo"], undo)
 root.bind(shortcut["redo"], redo)
 
-import sys
-if getattr(sys, "frozen", False):
-    BASE_DIR = Path(sys._MEIPASS)
-else:
-    BASE_DIR = Path(__file__).resolve().parent
-assetsDir = BASE_DIR
 imgPath = assetsDir / "assets" / "br.png"
 pilImg = Image.open(imgPath)
 pilImg = pilImg.resize((20, 20))
