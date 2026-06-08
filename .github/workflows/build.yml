@@ -1,0 +1,43 @@
+name: Build Pain_t
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Build Linux/macOS
+        if: runner.os != 'Windows'
+        run: |
+          pyinstaller --onefile --windowed --add-data "assets:assets" pain_t.py
+
+      - name: Build Windows
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller --onefile --windowed --add-data "assets;assets" pain_t.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pain_t-${{ matrix.os }}
+          path: dist/*
