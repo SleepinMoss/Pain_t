@@ -38,4 +38,4 @@ cd path/to/file
 chmod +x pain_t
 
 # Bug?
-If you find any, congrats! You find a feature i didnt know existed. Seriously, this is a personal project. Expect bug, but dont think im gonna fix it. Maybe i will, maybe i wont
+If you find any, congrats! You find a feature i didnt know existed. Seriously, this is a personal project. Expect bug, but dont think im gonna fix it. Maybe i will, maybe i wont. Also, I have only tried it on linux tho, idk if it could work on Windows or MacOS
