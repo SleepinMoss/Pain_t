@@ -17,7 +17,7 @@ root.geometry("1080x720")
 
 root.iconphoto(
     True,
-    tk.PhotoImage(file=assetsDir / "icon.png")
+    tk.PhotoImage(file=assetsDir / "assets" / "icon.png")
 )
 
 theme = {
