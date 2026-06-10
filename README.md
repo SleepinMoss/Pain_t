@@ -66,4 +66,4 @@ If you find one, congratulations! You've discovered a feature I didn't know exis
 
 Seriously though, this is a personal project. Expect bugs, but don't expect me to fix them. Maybe I will. Maybe I won't.
 
-Also, I've only tested it on Linux, so I have absolutely no idea whether it works on Windows or macOS.
+Have only been tested on Linux and Windows. I have absolutely no idea whether if it works on MacOS or not
