@@ -47,6 +47,8 @@ Or should I say... pain.
 
 ### Linux
 
+This app work on linux, but for some reason the color picker doesnt work on wayland. Worry not, it works on X11
+
 After extracting the archive, you'll need to make the file executable.
 
 ```bash
