@@ -1,6 +1,7 @@
 import tkinter as tk
 import colorsys, json
 from tkinter import *
+import time
 from tkinter import filedialog, messagebox
 from pathlib import Path
 from PIL import ImageGrab, Image, ImageTk
@@ -64,6 +65,7 @@ value = 0
 sizeStep = 1
 curTool = 0
 showOpt = 0
+lastLine = 1
 
 def rClick(event):
     global stabX
@@ -102,7 +104,7 @@ def pen(event=None):
     erButton.config(bg=theme["panelCol"])
 
 def click(event):
-    global lastX, lastY, lines, curLine, stabX, stabY, curTool
+    global lastX, lastY, lines, curLine, stabX, stabY, curTool, lastLine, cache_image, img
     if brushCol == 0:
         takeColor(event)
         curTool = 0
@@ -120,6 +122,11 @@ def click(event):
         lines[curLine] = []
         stabX, stabY = event.x, event.y
         lastX, lastY = stabX, stabY
+        if curLine % 50 == 0:
+            screenShot()
+            cache_image = img.copy()
+            lastLine = curLine
+
 
 def draw(event):
     global lastX, lastY, stabilize, stabX, stabY, lines, brushCol, burshSize
@@ -158,8 +165,23 @@ def turnToHex(r, g, b):
 # I gave up on the redo system. ChatGPT rewrote it lol
 
 def redrawCanvas():
+    global lastLine, cache_image, importedImg
     canvas.delete("all")
-    for lineNum in range(1, curLine + 1):
+    if curLine <= lastLine:
+        lastLine = 1
+        cache_image = None
+    if lastLine >= 49:
+        importedImg = ImageTk.PhotoImage(cache_image)
+        print(importedImg)
+        canvas.create_image(
+            0,
+            0,
+            anchor="nw",
+            image=importedImg
+        )
+    else:
+        lastLine = 1
+    for lineNum in range(lastLine, curLine + 1):
         for segment in lines[lineNum]:
             if segment[0] != "image":
                 canvas.create_line(
@@ -223,12 +245,7 @@ def export(event=None):
     settingsFrame.place_forget()
     showOpt = 0
     optButton.config(bg=theme["panelCol"])
-    root.update()
-    x = canvas.winfo_rootx()
-    y = canvas.winfo_rooty()
-    x1 = x + canvas.winfo_width()
-    y1 = y + canvas.winfo_height()
-    img = ImageGrab.grab(bbox=(x, y, x1, y1))
+    screenShot()
     filePath = filedialog.asksaveasfilename(
         defaultextension=".png",
         filetypes=[("PNG Image", "*.png")],
@@ -237,6 +254,16 @@ def export(event=None):
     if filePath:
         img.save(filePath)
         messagebox.showinfo("Information","Image exported succesfully!")
+
+def screenShot(event=None):
+    global img
+    root.update()
+    time.sleep(0.2)
+    x = canvas.winfo_rootx()
+    y = canvas.winfo_rooty()
+    x1 = x + canvas.winfo_width()
+    y1 = y + canvas.winfo_height()
+    img = ImageGrab.grab(bbox=(x, y, x1, y1))
 
 def save(event=None):
     global showOpt
