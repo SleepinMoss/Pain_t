@@ -6,6 +6,8 @@ from tkinter import filedialog, messagebox
 from pathlib import Path
 from PIL import ImageGrab, Image, ImageTk
 import sys
+import cv2
+import numpy as np
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys._MEIPASS)
 else:
@@ -66,6 +68,7 @@ sizeStep = 1
 curTool = 0
 showOpt = 0
 lastLine = 1
+speedPaint = False
 
 def rClick(event):
     global stabX
@@ -165,22 +168,29 @@ def turnToHex(r, g, b):
 # I gave up on the redo system. ChatGPT rewrote it lol
 
 def redrawCanvas():
-    global lastLine, cache_image, importedImg
+    global lastLine, cache_image, importedImg, speedPaint, img, video
     canvas.delete("all")
-    if curLine <= lastLine:
-        lastLine = 1
-        cache_image = None
-    if lastLine >= 49:
-        importedImg = ImageTk.PhotoImage(cache_image)
-        print(importedImg)
-        canvas.create_image(
-            0,
-            0,
-            anchor="nw",
-            image=importedImg
-        )
+    if not speedPaint:
+        if not curLine >= lastLine:
+            lastLine = 1
+            cache_image = None
+        if lastLine >= 49:
+            importedImg = ImageTk.PhotoImage(cache_image)
+            canvas.create_image(
+                0,
+                0,
+                anchor="nw",
+                image=importedImg
+            )
+        else:
+            lastLine = 1
     else:
-        lastLine = 1
+        video = cv2.VideoWriter(
+            "speedpaint.avi",
+            cv2.VideoWriter_fourcc(*"MJPG"),
+            30,
+            (602, 602)
+        )
     for lineNum in range(lastLine, curLine + 1):
         for segment in lines[lineNum]:
             if segment[0] != "image":
@@ -207,6 +217,17 @@ def redrawCanvas():
                     anchor="nw",
                     image=importedImg
                 )
+        if speedPaint:
+            canvas.update()
+            time.sleep(0)
+            vidx = canvas.winfo_rootx()
+            vidy = canvas.winfo_rooty()
+            vidx1 = vidx + canvas.winfo_width()
+            vidy1 = vidy + canvas.winfo_height()
+            frame = ImageGrab.grab(bbox=(vidx, vidy, vidx1, vidy1))
+            frame = cv2.cvtColor(np.array(frame),cv2.COLOR_RGB2BGR)
+            video.write(frame)
+
 
 def undo(event=None):
     global curLine
@@ -255,6 +276,20 @@ def export(event=None):
         img.save(filePath)
         messagebox.showinfo("Information","Image exported succesfully!")
 
+def exportSpeedpaint(event=None):
+    global showOpt, speedPaint, lastLine, video
+    settingsFrame.place_forget()
+    showOpt = 0
+    optButton.config(bg=theme["panelCol"])
+    speedPaint = True
+    lastLineTemp = lastLine
+    lastLine = 1
+    redrawCanvas()
+    video.release()
+    speedPaint = False
+    lastLine= lastLineTemp
+
+
 def screenShot(event=None):
     global img
     root.update()
@@ -285,7 +320,7 @@ def impImage(event=None):
     settingsFrame.place_forget()
     showOpt = 0
     optButton.config(bg=theme["panelCol"])
-    global lines, curLine, importedImg
+    global lines, curLine, importedImg, img, cache_image, lastLine
     fileTypes=[("JSON", "*.json"),("PNG", "*.png"),("JPEG", "*.jpeg")]
     selectedType = tk.StringVar()
     filepath = filedialog.askopenfilename(
@@ -316,6 +351,9 @@ def impImage(event=None):
             lines = {int(k): v for k, v in lines.items()}
             curLine = len(lines)
             redrawCanvas()
+            lastLine = curLine
+            screenShot()
+            cache_image = img.copy()
     except json.JSONDecodeError:
         messagebox.showerror("Error", "The selected file is not a valid JSON.")
     except Exception as e:
@@ -381,6 +419,8 @@ impButton = tk.Button(settingsFrame2, command=impImage, text="Import", bg=theme[
 impButton.pack()
 saveButton = tk.Button(settingsFrame2, command=save, text="Save", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
 saveButton.pack()
+expVidButton = tk.Button(settingsFrame2, command=exportSpeedpaint, text="Export Speed Paint", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+expVidButton.pack()
 
 optFrame = tk.Frame(lPanel, bg=theme["panelCol"])
 optFrame.pack(pady=15)
