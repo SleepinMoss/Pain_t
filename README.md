@@ -4,7 +4,9 @@
 
 ## Screenshot
 
-![Pain\_t Screenshot](https://github.com/user-attachments/assets/d1339fbb-c852-401e-a4fc-c901f32874bc)
+![Pain\_t Screenshot]<img width="1366" height="711" alt="image" src="https://github.com/user-attachments/assets/8edfb457-23df-4721-ac4f-d1a1a7990179" />
+Yes, I drew that!
+
 
 ## What in the world...
 
