@@ -4,8 +4,9 @@
 
 ## Screenshot
 
-![Pain\_t Screenshot]<img width="1366" height="711" alt="image" src="https://github.com/user-attachments/assets/8edfb457-23df-4721-ac4f-d1a1a7990179" />
+<img width="1366" height="711" alt="image" src="https://github.com/user-attachments/assets/8edfb457-23df-4721-ac4f-d1a1a7990179" />
 Yes, I drew that!
+Its not an original artwork. Link to the reference: https://pin.it/5hth0dZbp
 
 
 ## What in the world...
@@ -70,4 +71,4 @@ If you find one, congratulations! You've discovered a feature I didn't know exis
 
 Seriously though, this is a personal project. Expect bugs, but don't expect me to fix them. Maybe I will. Maybe I won't.
 
-Have only been tested on Linux and Windows. I have absolutely no idea whether if it works on MacOS or not
+Supports Linux, MacOS (have only been tested on Intel CPU Mac), and Windows. Doesn't support TempleOS currently though...
