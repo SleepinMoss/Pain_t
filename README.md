@@ -44,31 +44,31 @@ Also, I made the icon in Pain_t itself!
 
 ## Installation
 
+Supports Windows, Linux, and MacOS. Doesn't support TempleOS though...
+
 Go to the **Releases** tab, download the version for your operating system, extract it, and have fun!
 
 Or should I say... pain.
 
 ### Linux
 
-This app work on linux, but for some reason the color picker doesnt work on wayland. Worry not, it works on X11
+Doesn't supports Wayland. It works perfectly on X11 though!
 
-After extracting the archive, you'll need to make the file executable.
+### MacOS
 
+Apologize for MacOS x86_64 (Intel Cpu) user. I have been trying to build it on Github, but doesn't seem to work. 
+Instead, I will give you guys tutorial!
+
+1. Install Python
+2. Install Dependencies
+3. Install PyInstaller
+4. Install and unzip the source code
+5. Open your terminal and go to the directory you installed the source code
+6. Finally, paste this command:
 ```bash
-cd path/to/file
-chmod +x pain_t
-```
-
-Then run:
-
-```bash
-./pain_t
+pyinstaller --onefile --windowed --collect-all PIL --icon=assets/icon.icns --add-data "assets:assets" pain_t.py
 ```
 
 ## Bugs?
 
 If you find one, congratulations! You've discovered a feature I didn't know existed.
-
-Seriously though, this is a personal project. Expect bugs, but don't expect me to fix them. Maybe I will. Maybe I won't.
-
-Supports Linux, MacOS (have only been tested on Intel CPU Mac), and Windows. Doesn't support TempleOS currently though...
