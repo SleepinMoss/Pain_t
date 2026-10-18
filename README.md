@@ -50,17 +50,13 @@ Go to the **Releases** tab, download the version for your operating system, extr
 
 Or should I say... pain.
 
-### Linux
-
-Doesn't supports Wayland. It works perfectly on X11 though!
-
 ### MacOS
 
 Apologize for MacOS x86_64 (Intel Cpu) user. I have been trying to build it on Github, but doesn't seem to work. 
 Instead, I will give you guys tutorial!
 
 1. Install Python
-2. Install Dependencies
+2. Install Dependencies (in the requirements file)
 3. Install PyInstaller
 4. Install and unzip the source code
 5. Open your terminal and go to the directory you installed the source code
