@@ -29,6 +29,7 @@ Also, I made the icon in Pain_t itself!
 * Export as PNG
 * Import PNG, JPEG, and Pain_t JSON files
 * Save as JSON to preserve stroke history, enabling Undo and Redo
+* Export speed paint
 
 ## Keybinds
 
