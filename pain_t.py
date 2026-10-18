@@ -6,7 +6,7 @@ from tkinter import filedialog, messagebox
 from pathlib import Path
 from PIL import ImageGrab, Image, ImageTk
 import sys
-import cv2
+import imageio
 import numpy as np
 if getattr(sys, "frozen", False):
     BASE_DIR = Path(sys._MEIPASS)
@@ -167,7 +167,7 @@ def turnToHex(r, g, b):
 # I gave up on the redo system. ChatGPT rewrote it lol
 
 def redrawCanvas():
-    global lastLine, cache_image, importedImg, speedPaint, img, video, filePathx
+    global lastLine, cache_image, importedImg, speedPaint, img, video, filePath
     canvas.delete("all")
     if not speedPaint:
         if not curLine >= lastLine:
@@ -184,11 +184,9 @@ def redrawCanvas():
         else:
             lastLine = 1
     else:
-        video = cv2.VideoWriter(
+        video = imageio.get_writer(
             filePath,
-            cv2.VideoWriter_fourcc(*"MJPG"),
-            30,
-            (602, 602)
+            fps=30
         )
     for lineNum in range(lastLine, curLine + 1):
         for segment in lines[lineNum]:
@@ -205,7 +203,7 @@ def redrawCanvas():
                 )
             else:
                 img = Image.open(segment[1])
-                img.thumbnail((600, 600))
+                img.thumbnail((canvasWidth, canvasHeight))
                 importedImg = ImageTk.PhotoImage(img)
                 if not hasattr(redrawCanvas, "images"):
                     redrawCanvas.images = []
@@ -224,8 +222,7 @@ def redrawCanvas():
             vidx1 = vidx + canvas.winfo_width()
             vidy1 = vidy + canvas.winfo_height()
             frame = ImageGrab.grab(bbox=(vidx, vidy, vidx1, vidy1))
-            frame = cv2.cvtColor(np.array(frame),cv2.COLOR_RGB2BGR)
-            video.write(frame)
+            video.append_data(np.array(frame))
 
 
 def undo(event=None):
@@ -265,6 +262,9 @@ def export(event=None):
     settingsFrame.place_forget()
     showOpt = 0
     optButton.config(bg=theme["panelCol"])
+    settingsFrameBase.place_forget()
+    showOpt = 0
+    optButton.config(bg=theme["panelCol"])
     screenShot()
     filePath = filedialog.asksaveasfilename(
         defaultextension=".png",
@@ -288,8 +288,12 @@ def exportSpeedpaint(event=None):
         filetypes=[("AVI files", "*.avi")],
         title = "Export speed paint video"
     )
-    redrawCanvas()
-    video.release()
+    settingsFrameBase.place_forget()
+    showOpt = 0
+    optButton.config(bg=theme["panelCol"])
+    if filePath:
+    	redrawCanvas()
+    	video.close()
     speedPaint = False
     lastLine= lastLineTemp
 
@@ -314,6 +318,9 @@ def save(event=None):
         filetypes=[("JSON files", "*.json")],
         title = "Save Pain_t file (JSON)..."
     )
+    settingsFrameBase.place_forget()
+    showOpt = 0
+    optButton.config(bg=theme["panelCol"])
     if filePath:
         with open(filePath, "w") as f:
             json.dump(lines, f, )
@@ -332,12 +339,15 @@ def impImage(event=None):
         filetypes = fileTypes,
         typevariable=selectedType
     )
+    settingsFrameBase.place_forget()
+    showOpt = 0
+    optButton.config(bg=theme["panelCol"])
     if not filepath:
         return
     try:
         if selectedType.get() != "JSON":
             img = Image.open(filepath)
-            img.thumbnail((600,600))
+            img.thumbnail((canvasWidth,canvasHeight))
             importedImg = ImageTk.PhotoImage(img)
             if curLine != len(lines):
                 delLines = len(lines) - curLine
@@ -544,6 +554,7 @@ stepInc = tk.Button(stepFrame, command=stepIncr, text="+", fg=theme["textCol"], 
 stepInc.pack(side=LEFT)
 
 def createCanvas(event=None):
+	global canvasWidth, canvasHeight
 	canvasWidth = widthInput.get()
 	canvasHeight = heightInput.get()
 	canvas.config(width=canvasWidth, height=canvasHeight)
