@@ -47,7 +47,6 @@ lPanel.pack(padx=15, pady=15, side=tk.LEFT)
 canframe = tk.Frame(root)
 canframe.pack(side=tk.LEFT, expand=True)
 canvas = Canvas(canframe, width=600, height=600, background="#ffffff")
-canvas.pack(anchor=tk.CENTER)
 rPanel = tk.Frame(root, width=300, height=720, bg=theme["bgCol"])
 rPanel.pack(padx=15, pady=15, side=tk.RIGHT)
 
@@ -168,7 +167,7 @@ def turnToHex(r, g, b):
 # I gave up on the redo system. ChatGPT rewrote it lol
 
 def redrawCanvas():
-    global lastLine, cache_image, importedImg, speedPaint, img, video
+    global lastLine, cache_image, importedImg, speedPaint, img, video, filePathx
     canvas.delete("all")
     if not speedPaint:
         if not curLine >= lastLine:
@@ -186,7 +185,7 @@ def redrawCanvas():
             lastLine = 1
     else:
         video = cv2.VideoWriter(
-            "speedpaint.avi",
+            filePath,
             cv2.VideoWriter_fourcc(*"MJPG"),
             30,
             (602, 602)
@@ -277,13 +276,18 @@ def export(event=None):
         messagebox.showinfo("Information","Image exported succesfully!")
 
 def exportSpeedpaint(event=None):
-    global showOpt, speedPaint, lastLine, video
+    global showOpt, speedPaint, lastLine, video, filePath
     settingsFrame.place_forget()
     showOpt = 0
     optButton.config(bg=theme["panelCol"])
     speedPaint = True
     lastLineTemp = lastLine
     lastLine = 1
+    filePath = filedialog.asksaveasfilename(
+        defaultextension=".avi",
+        filetypes=[("AVI files", "*.avi")],
+        title = "Export speed paint video"
+    )
     redrawCanvas()
     video.release()
     speedPaint = False
@@ -362,12 +366,12 @@ def impImage(event=None):
 def settings(event=None):
     global showOpt
     if showOpt == 0:
-        settingsFrame.place(relx=0.5, rely=0.5, anchor="center")
-        settingsFrame.lift()
+        settingsFrameBase.place(relx=0.07, rely=0.4, anchor="w")
+        settingsFrameBase.lift()
         showOpt = 1
         optButton.config(bg=theme["accent"])
     else:
-        settingsFrame.place_forget()
+        settingsFrameBase.place_forget()
         showOpt = 0
         optButton.config(bg=theme["panelCol"])
 
@@ -383,70 +387,63 @@ root.bind(shortcut["colPick"], colPick)
 root.bind(shortcut["undo"], undo)
 root.bind(shortcut["redo"], redo)
 
-imgPath = assetsDir / "assets" / "br.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-brIco = ImageTk.PhotoImage(pilImg)
-imgPath = assetsDir / "assets" / "er.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-erIco = ImageTk.PhotoImage(pilImg)
-imgPath = assetsDir / "assets" / "pick.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-pickIco = ImageTk.PhotoImage(pilImg)
-imgPath = assetsDir / "assets" / "undo.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-undoIco = ImageTk.PhotoImage(pilImg)
-imgPath = assetsDir / "assets" / "redo.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-redoIco = ImageTk.PhotoImage(pilImg)
-imgPath = assetsDir / "assets" / "settings.png"
-pilImg = Image.open(imgPath)
-pilImg = pilImg.resize((20, 20))
-optIco = ImageTk.PhotoImage(pilImg)
+def getIcon(ico):
+    iconPath = assetsDir / "assets" / ico
+    pilImg = Image.open(iconPath)
+    pilImg = pilImg.resize((20, 20))
+    return(ImageTk.PhotoImage(pilImg))
 
-settingsFrame = tk.Frame(root, bg=theme["panelCol"], width=500, height=800)
-settingsFrame2 = tk.Frame(settingsFrame, bg=theme["panelCol"])
-settingsFrame2.pack(padx=20, pady=20)
-optLabel = tk.Label(settingsFrame2, text="============= Settings =============", bg=theme["panelCol"], fg=theme["textCol"], font=("sans_serif", 15, "bold"))
-optLabel.pack()
-expButton = tk.Button(settingsFrame2, command=export, text="Export", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+def getTextButton(function, title):
+    return(tk.Button(settingsFrame, command=function, text=title, bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat"))
+
+def getImageButton(function, icon):
+    return(tk.Button(optFrame, command=function, image=icon, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25))
+
+brIco = getIcon("br.png")
+erIco = getIcon("er.png")
+pickIco = getIcon("pick.png")
+undoIco = getIcon("undo.png")
+redoIco = getIcon("redo.png")
+optIco = getIcon("settings.png")
+
+settingsFrameBase = tk.Frame(root, bg=theme["panelCol"], width=500, height=800)
+settingsFrame = tk.Frame(settingsFrameBase, bg=theme["panelCol"])
+settingsFrame.pack(padx=15, pady=15)
+
+expButton = getTextButton(export, "Export")
 expButton.pack()
-impButton = tk.Button(settingsFrame2, command=impImage, text="Import", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+impButton = getTextButton(impImage, "Import")
 impButton.pack()
-saveButton = tk.Button(settingsFrame2, command=save, text="Save", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+saveButton = getTextButton(save, "Save")
 saveButton.pack()
-expVidButton = tk.Button(settingsFrame2, command=exportSpeedpaint, text="Export Speed Paint", bg=theme["panelCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+expVidButton = getTextButton(exportSpeedpaint, "Export Video")
 expVidButton.pack()
 
 optFrame = tk.Frame(lPanel, bg=theme["panelCol"])
 optFrame.pack(pady=15)
-optButton = tk.Button(optFrame, command=settings, image=optIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+optButton = getImageButton(settings, optIco)
 optButton.pack(padx=8, pady=8, expand=False)
 
 toolFrame = tk.Frame(lPanel, bg=theme["panelCol"])
 toolFrame.pack()
-penButton = tk.Button(toolFrame, command=pen, image=brIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+penButton = getImageButton(pen, brIco)
 penButton.pack(padx=8, pady=8, expand=False)
-erButton = tk.Button(toolFrame, command=eraser, image=erIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+erButton = getImageButton(eraser, erIco)
 erButton.pack(padx=8, pady=8, expand=False)
-colButton = tk.Button(toolFrame, command=colPick, image=pickIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+colButton = getImageButton(colPick, pickIco)
 colButton.pack(padx=8, pady=8, expand=False)
-undoButton = tk.Button(toolFrame, command=undo, image=undoIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+undoButton = getImageButton(undo, undoIco)
 undoButton.pack(padx=8, pady=8, expand=False)
-redoButton = tk.Button(toolFrame, command=redo, image=redoIco, bg=theme["panelCol"], borderwidth=0, highlightthickness=0, highlightcolor=theme["bgCol"], relief="flat", width=25, height=25)
+redoButton = getImageButton(redo,redoIco)
 redoButton.pack(padx=8, pady=8, expand=False)
 
 penButton.config(bg=theme["accent"])
 colButton.config(bg=theme["panelCol"])
 erButton.config(bg=theme["panelCol"])
 
-colorFrame2 = tk.Frame(rPanel, bg=theme["panelCol"])
-colorFrame2.pack(padx=15, pady=15)
-colorFrame = tk.Frame(colorFrame2, bg=theme["panelCol"])
+colorFrameBase = tk.Frame(rPanel, bg=theme["panelCol"])
+colorFrameBase.pack(padx=15, pady=15)
+colorFrame = tk.Frame(colorFrameBase, bg=theme["panelCol"])
 colorFrame.pack(padx=15, pady=15)
 color = Canvas(colorFrame, width=120, height=120, background=brushCol)
 color.pack()
@@ -471,11 +468,6 @@ valLabel.pack(side=LEFT, padx=5)
 valSlider = tk.Scale(valFrame, from_=0, to=100, orient='horizontal', command=hsvToHex, length=145, bg=theme["panelCol"], bd=0, troughcolor=theme["bgCol"], highlightthickness=0, fg=theme["textCol"], width=16, showvalue=0, sliderlength=12)
 valSlider.pack()
 
-brushFrame2 = tk.Frame(rPanel ,bg=theme["panelCol"])
-brushFrame2.pack(padx=15, pady=15)
-brushFrame = tk.Frame(brushFrame2 ,bg=theme["panelCol"])
-brushFrame.pack(padx=15, pady=15)
-
 def sizeIncr(event=None):
     global brushSize
     brushSize += 1
@@ -490,7 +482,7 @@ def sizeDecr(event=None):
         brushSize = 0
     sizeShow.config(text=brushSize)
 
-sizeFrame = tk.Frame(brushFrame, bg=theme["panelCol"])
+sizeFrame = tk.Frame(colorFrame, bg=theme["panelCol"])
 sizeFrame.pack()
 sizeLabel = tk.Label(sizeFrame, text="Brush Size: ", fg=theme["textCol"], bg=theme["panelCol"], width=12)
 sizeLabel.pack(side=LEFT)
@@ -515,7 +507,7 @@ def stabDecr(event=None):
         stabilize = 1
     stabShow.config(text=stabilize)
 
-stabFrame = tk.Frame(brushFrame, bg=theme["panelCol"])
+stabFrame = tk.Frame(colorFrame, bg=theme["panelCol"])
 stabFrame.pack()
 stabLabel = tk.Label(stabFrame, text="Stabilizer: ", fg=theme["textCol"], bg=theme["panelCol"], width=12)
 stabLabel.pack(side=LEFT)
@@ -540,7 +532,7 @@ def stepDecr(event=None):
         sizeStep = 1
     stepShow.config(text=sizeStep)
 
-stepFrame = tk.Frame(brushFrame, bg=theme["panelCol"])
+stepFrame = tk.Frame(colorFrame, bg=theme["panelCol"])
 stepFrame.pack()
 stepLabel = tk.Label(stepFrame, text="Size Step: ", fg=theme["textCol"], bg=theme["panelCol"], width=12)
 stepLabel.pack(side=LEFT)
@@ -550,5 +542,41 @@ stepDec = tk.Button(stepFrame, command=stepDecr, text="-", fg=theme["textCol"], 
 stepDec.pack(side=LEFT)
 stepInc = tk.Button(stepFrame, command=stepIncr, text="+", fg=theme["textCol"], bg=theme["bgCol"], borderwidth=0, highlightthickness=0, relief="flat")
 stepInc.pack(side=LEFT)
+
+def createCanvas(event=None):
+	canvasWidth = widthInput.get()
+	canvasHeight = heightInput.get()
+	canvas.config(width=canvasWidth, height=canvasHeight)
+	canvas.pack(anchor=tk.CENTER)
+	makeNewDrawingFrameBase.place_forget()
+
+makeNewDrawingFrameBase = tk.Frame(root, bg=theme["panelCol"], width=500, height=400)
+makeNewDrawingFrameBase.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+makeNewDrawingFrame = tk.Frame(makeNewDrawingFrameBase, bg=theme["panelCol"], width=500, height=400)
+makeNewDrawingFrame.pack(padx=35, pady=35)
+
+inputFrame = tk.Frame(makeNewDrawingFrame, bg=theme["panelCol"], width=50, height=100)
+inputFrame.pack()
+
+widthFrame = tk.Frame(inputFrame, bg=theme["buttonCol"])
+widthFrame.pack(side=LEFT, padx=2, pady=2)
+widthLabel = tk.Label(widthFrame, text="Width:", bg=theme["buttonCol"], fg=theme["textCol"])
+widthLabel.pack(side=LEFT)
+widthInput = tk.Entry(widthFrame, width=5, borderwidth=0, highlightthickness=0, relief="flat", bg=theme["buttonCol"], fg=theme["textCol"])
+widthInput.insert(0, "800")
+widthInput.pack(side=RIGHT, padx=5, pady=5)
+
+heightFrame = tk.Frame(inputFrame, bg=theme["buttonCol"])
+heightFrame.pack(side=RIGHT, padx=2, pady=2)
+heightLabel = tk.Label(heightFrame, text="Height:", bg=theme["buttonCol"], fg=theme["textCol"])
+heightLabel.pack(side=LEFT)
+heightInput = tk.Entry(heightFrame, width=5, borderwidth=0, highlightthickness=0, relief="flat", bg=theme["buttonCol"], fg=theme["textCol"])
+heightInput.insert(0, "600")
+heightInput.pack(side=RIGHT, padx=5, pady=5)
+
+createButton = tk.Button(makeNewDrawingFrame, command=createCanvas, text="Create New Drawing", width=20, bg=theme["buttonCol"], fg=theme["textCol"], borderwidth=0, highlightthickness=0, relief="flat")
+createButton.pack(padx=5, pady=5)
+
+makeNewDrawingFrameBase.lift()
 
 root.mainloop()
